@@ -1,6 +1,14 @@
-//running e131 through OctoWS2811 powered by fastled.  
-//pushing the envelope
-//pinouts modifyed to follow fastled pinout schedule
+//DTG E131 
+//running e131 through OctoWS2811 powered by fastled on a custom designed
+//32 pinout board called DuoTrigesimalWS2811
+//
+//The following varibles should be edited to match the hardware: 
+//  NUM_LEDS_PER_STRIP - this should be the maximum number of leds on the longest string, 1 universe is 170 leds (can be changed below), multiples of this number make life easier. 
+//  NUM_STRIPS - if using less than 32, put this at the number you are using
+//  DMX_UNIVERSE - starting universe
+//  UNIVERSE_COUNT = number of universes, should be #strips * universes per strip
+//  IPAddress - static address only, DHCP not enabled at present
+//  pinList - only list the pins used, only allows NUM_STRIPS worth of pins to be used.  Should be listed in sequential universe count order. 
 
 #include <OctoWS2811.h>
 #include <FastLED.h>
@@ -11,8 +19,7 @@
 //#define DEBUG 1
 
  
-//DEFINES for at Compile time. 
-//Leave this alone.  At current a full e1.31 frame is 636 bytes..
+//Compile Time DEFINES 
 #define ETHERNET_BUFFER 636 //540 is artnet leave at 636 for e1.31
 #define NUM_LEDS_PER_STRIP 680 //170 per universe //680 default
 #define NUM_STRIPS 32 //make sure pin list is accurate
@@ -20,11 +27,10 @@
 
 int unsigned DMX_UNIVERSE = 1; //**Start** universe 1, 9, 17, 25, 33, 41
 int unsigned UNIVERSE_COUNT = 128; //How Many Universes 8, 8, 8, 4, 8, 8
-int unsigned UNIVERSE_LAST = 128; // List the last universe typically its sequencially from start but does not have to. 8, 16, 24, 28, 32, 40
+int unsigned UNIVERSE_LAST = DMX_UNIVERSE + UNIVERSE_COUNT - 1; // List the last universe typically its sequencially from start but does not have to. 8, 16, 24, 28, 32, 40
 int unsigned CHANNEL_COUNT = 510; //max channels per dmx packet
-byte unsigned LEDS_PER_UNIVERSE = 170; // Max RGB pixels //170 default
-int unsigned NUM_LEDS  = UNIVERSE_COUNT * LEDS_PER_UNIVERSE; // with current fastLED and OctoWs2811 libraries buffers... do not go higher than this - Runs out of SRAM
-
+byte unsigned LEDS_PER_UNIVERSE = 170; // Max RGB pixels for e1.31 universe//170 default
+int unsigned NUM_LEDS  = UNIVERSE_COUNT * LEDS_PER_UNIVERSE; //
 
 //ethernet setup
 unsigned char packetBuffer[ETHERNET_BUFFER];
@@ -41,9 +47,8 @@ IPAddress ip(192,168,1,10); //static ip address of board
 
 //set up OctoWS2811 and FastLED for Teensy 4.1
 const int numPins = NUM_STRIPS;
-//byte pinList[numPins] = {2,3,4,5,6,7,8,9,10,11,12,13,14,16,17,16,27,28,29,30,31,35,36,37,38,39,40,41,42,43,44,45};
-//byte pinList[numPins] = {24,25,19,18,14,15,17,16,22,23,20,21,26,27,10,12,11,13,6,9,32,8,7,37,36,35,34,39,38,28,31,30};
-byte pinList[numPins] = {6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,31,32,34,35,36,37,38,39};
+//byte pinList[numPins] = {2,3,4,5,6,7,8,9,10,11,12,13,14,16,17,16,27,28,29,30,31,35,36,37,38,39,40,41,42,43,44,45}; //listed sequentially, can be changed to meet hardware needs
+byte pinList[numPins] = {34,35,36,37,38,39,14,15,16,17,18,19,20,21,22,23,6,7,8,9,10,11,12,13,24,25,26,27,28,30,31,32}; //pinout order for DTG WS2811
 
 const int ledsPerStrip = NUM_LEDS_PER_STRIP; //this should be NUM_LEDS / numPins => VERIFY THIS MATCHES THE HARDWARE!! //should also be multiples of a single universe of leds
 CRGB rgbarray[numPins * ledsPerStrip];
@@ -121,7 +126,7 @@ void setup() {
   pcontroller = new CTeensy4Controller<RGB, WS2811_800kHz>(&octo);
 
   FastLED.addLeds(pcontroller, rgbarray, numPins * ledsPerStrip);
-  FastLED.setBrightness(50);
+  FastLED.setBrightness(100);
   
   initTest();
   Serial.println("Test Sequence Complete");
@@ -281,13 +286,13 @@ void initTest() //runs at board boot to make sure pixels are working
 //  delay(500);
   
   LEDS.showColor(CRGB(255, 0, 0)); //turn all pixels on red
-  delay(3000);
+  delay(5000);
 
   LEDS.showColor(CRGB(0, 255, 0)); //turn all pixels on green
-  delay(3000);
+  delay(5000);
 
   LEDS.showColor(CRGB(0, 0, 255)); //turn all pixels on blue
-  delay(3000);
+  delay(5000);
 
   LEDS.showColor(CRGB(0,0,0)); //turn off all pixels to start
 
@@ -321,9 +326,6 @@ void initTest() //runs at board boot to make sure pixels are working
 */
 
 }
-
-
-
 
 //define mac address of board
 void teensyMAC(uint8_t *mac) {
