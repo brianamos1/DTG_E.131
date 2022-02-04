@@ -48,6 +48,7 @@ IPAddress ip(192,168,1,10); //static ip address of board
 //set up OctoWS2811 and FastLED for Teensy 4.1
 const int numPins = NUM_STRIPS;
 //byte pinList[numPins] = {2,3,4,5,6,7,8,9,10,11,12,13,14,16,17,16,27,28,29,30,31,35,36,37,38,39,40,41,42,43,44,45}; //listed sequentially, can be changed to meet hardware needs
+//byte pinList[numPins[ = {37,36,35,34,15,14,39,38,19,18,17,16,23,22,21,20,9,8,7,6,13,12,11,10,27,26,25,24,32,31,30,28} //pinout order for the DTG WS2811 with the adamtech 4xRJ45 Ports
 byte pinList[numPins] = {34,35,36,37,38,39,14,15,16,17,18,19,20,21,22,23,6,7,8,9,10,11,12,13,24,25,26,27,28,30,31,32}; //pinout order for DTG WS2811
 
 const int ledsPerStrip = NUM_LEDS_PER_STRIP; //this should be NUM_LEDS / numPins => VERIFY THIS MATCHES THE HARDWARE!! //should also be multiples of a single universe of leds
